@@ -1,3 +1,6 @@
+from random import choice, randint
+
+
 class SudokuSolver:
 
     @staticmethod
@@ -19,25 +22,29 @@ class SudokuSolver:
     @staticmethod
     def get_valid_numbers(board, row, col):
         """Returns a set of possible numbers that could be inserted in a grid cell"""
-        valid_in_row_set = SudokuSolver.get_valid_numbers_in_row(board, row)
-        valid_in_col_set = SudokuSolver.get_valid_in_column(board, col)
+        valid_in_row_set = SudokuSolver.get_valid_numbers_in_row(board, row, col)
+        valid_in_col_set = SudokuSolver.get_valid_in_column(board, row, col)
         valid_in_square_set = SudokuSolver.get_valid_in_square(board, row, col)
         return valid_in_col_set & valid_in_row_set & valid_in_square_set
 
     @staticmethod
-    def get_valid_numbers_in_row(board, row):
-        """Returns a set of numbers valid in the row given sudoku constraints"""
+    def get_valid_numbers_in_row(board, row, col):
+        """Returns a set of numbers valid in box given the sudoku row constraints"""
         valid_numbers = {1,2,3,4,5,6,7,8,9}
-        for item in board[row]:
-            if item in valid_numbers:
+        for index, item in enumerate(board[row]):
+            if index == col:
+                continue
+            elif item in valid_numbers:
                 valid_numbers.remove(item)
         return valid_numbers
 
     @staticmethod
-    def get_valid_in_column(board, col):
+    def get_valid_in_column(board, row, col):
         """Returns a set of numbers valid in the column given sudoku constraints"""
         valid_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9}
         for row_index, _ in enumerate(board):
+            if row_index == row:
+                continue
             square = board[row_index][col]
             if square in valid_numbers:
                 valid_numbers.remove(square)
@@ -52,16 +59,18 @@ class SudokuSolver:
         for y in range(start_y, start_y + 3):
             for x in range(start_x, start_x + 3):
                 square_value = board[y][x]
-                if square_value in valid_numbers:
+                if y == row and x == col:
+                    continue
+                elif square_value in valid_numbers:
                     valid_numbers.remove(square_value)
         return valid_numbers
 
     @staticmethod
     def is_solution(board):
         """Checks if the board is competely filled with non zero numbers"""
-        for i in range(len(board)):
-            for j in range(len(board)):
-                if board[i][j] == 0:
+        for row in range(len(board)):
+            for col in range(len(board)):
+                if board[row][col] not in SudokuSolver.get_valid_numbers(board, row, col):
                     return False
         return True
 
@@ -73,6 +82,24 @@ class SudokuSolver:
                 if board[row_index][col_index] == 0:
                     return row_index, col_index
 
+
+    @staticmethod
+    def generate_new_board():
+        """Randomly generates a seed for a board, then solves the board and removes
+        numbers until more than one solution can be reached"""
+        new_board = [[0] * 9 for i in range(9)]
+        possible_numbers = [1,2,3,4,5,6,7,8,9]
+        row = randint(0,8)
+        for col in range(len(new_board[row])):
+            value = choice(possible_numbers)
+            possible_numbers.remove(value)
+            new_board[row][col] = value
+
+        new_board = SudokuSolver.solve(new_board)
+        return new_board
+
+
     def check_board_validity(self, board):
         pass
+
 
