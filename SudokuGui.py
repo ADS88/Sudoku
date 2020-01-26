@@ -1,13 +1,23 @@
 from tkinter import *
 from SudokuSolve import *
+import copy
 
 
 class SudokuGrid():
-    def __init__(self, default_board):
+    def __init__(self):
         self.window = Tk()
         self.grid_boxes = []
         self.setup_gui()
-        self.set_board(default_board)
+        self.current_board = [[1,0,0,0,7,0,3,0,0],
+                 [0,8,0,0,2,0,7,0,0],
+                 [3,0,0,0,8,9,0,0,4],
+                 [8,4,0,0,0,1,9,0,3],
+                 [0,0,3,7,0,8,5,0,0],
+                 [9,0,1,2,0,0,0,7,8],
+                 [7,0,0,3,5,0,0,0,9],
+                 [0,0,9,0,4,0,0,5,0],
+                 [0,0,4,0,1,0,0,0,2]]
+        self.set_board(self.current_board)
         self.window.mainloop()
 
     def setup_gui(self):
@@ -15,12 +25,16 @@ class SudokuGrid():
         self.window.title("Sudoku")
         self.window.geometry('800x600')
         self.create_board()
-        random_game_button = Button(self.window, text="Random Game", command=self.set_board)
+        reset_board_button = Button(self.window, text="Reset Board", command=self.set_board)
+        new_board_button = Button(self.window, text="New Board", command=self.new_board)
+        check_solution_button = Button(self.window, text="Check solution", command=self.check_solution)
         solve_board_button = Button(self.window, text="Solve Board", command=self.solve_board)
-        feedback_label = Label(self.window, text="Welcome to my cool sudoku game")
-        random_game_button.grid(column=0, row=14, columnspan=4)
-        solve_board_button.grid(column=5, row=14, columnspan=4)
-        feedback_label.grid(column=0, row=15, columnspan=4)
+        self.feedback_label = Label(self.window, text="")
+        new_board_button.grid(column=0, row=14, columnspan=2)
+        check_solution_button.grid(column=2, row=14, columnspan=2)
+        reset_board_button.grid(column=4, row=14, columnspan=2)
+        solve_board_button.grid(column=6, row=14, columnspan=2)
+        self.feedback_label.grid(column=2, row=15, columnspan=2)
 
 
     def create_board(self):
@@ -34,6 +48,8 @@ class SudokuGrid():
                 self.grid_boxes[row].append(input_box)
 
     def set_board(self, grid=None):
+        if not grid:
+            grid = self.current_board
         """Sets the board to display the numbers in a sudoku grid, resets the board if grid is None"""
         for row_index, row in enumerate(self.grid_boxes):
             for column_index, box in enumerate(row):
@@ -44,6 +60,7 @@ class SudokuGrid():
                         box.config(state='readonly')
                     else:
                         box.set("")
+                        box.config(state="normal")
                 else:
                     box.set("")
                     box.config(state="normal")
@@ -58,11 +75,22 @@ class SudokuGrid():
                 board[index].append(int(value)) if value != "" else board[index].append(0)
         return board
 
+    def check_solution(self):
+        board = self.get_board_as_list()
+        if SudokuSolver.is_solution(board):
+            self.feedback_label.config(text="Correct solution")
+        else:
+            self.feedback_label.config(text="Incorrect solution")
+
     def solve_board(self):
         """Solves the board and displays the solution"""
-        board = self.get_board_as_list()
+        board = copy.deepcopy(self.current_board)
         solved_board = SudokuSolver.solve(board)
         self.set_board(solved_board)
+
+    def new_board(self):
+        self.current_board = SudokuSolver.generate_new_board()
+        self.set_board(self.current_board)
 
 
 class SudokuGridBox(Entry):
@@ -86,18 +114,7 @@ class SudokuGridBox(Entry):
             self.set(self.old_value)
 
 
-
-default_board = [[1,0,0,0,7,0,3,0,0],
-                 [0,8,0,0,2,0,7,0,0],
-                 [3,0,0,0,8,9,0,0,4],
-                 [8,4,0,0,0,1,9,0,3],
-                 [0,0,3,7,0,8,5,0,0],
-                 [9,0,1,2,0,0,0,7,8],
-                 [7,0,0,3,5,0,0,0,9],
-                 [0,0,9,0,4,0,0,5,0],
-                 [0,0,4,0,1,0,0,0,2]]
-
-sudoko_grid = SudokuGrid(default_board)
+sudoko_grid = SudokuGrid()
 
 
 
