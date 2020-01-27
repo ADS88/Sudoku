@@ -3,9 +3,9 @@ from SudokuSolve import *
 import copy
 
 
-class SudokuGrid():
-    def __init__(self):
-        self.window = Tk()
+class MainApplication():
+    def __init__(self, window):
+        self.window = window
         self.grid_boxes = []
         self.setup_gui()
         self.current_board = [[1,0,0,0,7,0,3,0,0],
@@ -18,7 +18,6 @@ class SudokuGrid():
                  [0,0,9,0,4,0,0,5,0],
                  [0,0,4,0,1,0,0,0,2]]
         self.set_board(self.current_board)
-        self.window.mainloop()
 
     def setup_gui(self):
         """Creates buttons and labels used in the GUI"""
@@ -89,8 +88,8 @@ class SudokuGrid():
     def solve_board(self):
         """Solves the board and displays the solution"""
         board = copy.deepcopy(self.current_board)
-        solved_board = solve(board, self.grid_boxes)
-        self.set_board(solved_board)
+        solved_board = solve(board, self.window, self.grid_boxes)
+        # self.set_board(solved_board)
 
     def new_board(self):
         self.current_board = generate_new_board()
@@ -120,7 +119,12 @@ class SudokuGridBox(Entry):
         else:
             self.set(self.old_value)
 
-sudoko_grid = SudokuGrid()
+
+if __name__ == "__main__":
+    window = tk.Tk()
+    MainApplication(window)
+    window.mainloop()
+
 
 
 

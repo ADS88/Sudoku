@@ -1,27 +1,34 @@
 from random import choice, randint
 import time
-from tkinter import *
+import tkinter as tk
 
 
-
-def solve(board, grid_boxes):
+def solve(board, window, grid_boxes=None):
     if is_solution(board):
-        return board
+        return board, window, grid_boxes
     row, col = get_first_unfilled_square(board)
     possible_solutions = get_valid_numbers(board, row, col)
     if possible_solutions:
-        grid_boxes[row][col].config(fg="Green")
         for number in possible_solutions:
-            time.sleep(0.0001)
-            grid_boxes[row][col].set(number)
+            if grid_boxes:
+                grid_boxes[row][col].after(20000000, update_gui, "Green", number)
+                grid_boxes[row][col].config(fg="Green")
+                grid_boxes[row][col].set(number)
+                window.update_idletasks()
+                # time.sleep(0.01)
             board[row][col] = number
-            solved = solve(board, grid_boxes)
+            solved = solve(board, window, grid_boxes)
             if is_solution(solved):
                 return solved
 
     board[row][col] = 0
-    grid_boxes[row][col].config(fg="Red")
-    time.sleep(0.0001)
+    if grid_boxes:
+        update_gui(window, grid_boxes[row][col], "Red", "")
+        # time.sleep(0.01)
+        window.update_idletasks()
+        grid_boxes[row][col].set("")
+        # time.sleep(0.01)
+        window.update_idletasks()
     return board
 
 
@@ -88,7 +95,7 @@ def get_first_unfilled_square(board):
                 return row_index, col_index
 
 
-def generate_new_board():
+def generate_new_board(grid_boxes=None):
     """Randomly generates a seed for a board, then solves the board and removes
     numbers until more than one solution can be reached"""
     new_board = [[0] * 9 for i in range(9)]
@@ -99,7 +106,7 @@ def generate_new_board():
         possible_numbers.remove(value)
         new_board[row][col] = value
 
-    new_board = solve(new_board)
+    new_board = solve(new_board, grid_boxes)
 
     for row in range(9):
         num_squares_to_delete = randint(7,9)
@@ -108,4 +115,9 @@ def generate_new_board():
             new_board[row][col] = 0
 
     return new_board
+
+def update_gui(window, grid_box, colour, value):
+    grid_box.config(fg=colour)
+    grid_box.set(value)
+
 
