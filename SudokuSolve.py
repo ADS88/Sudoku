@@ -3,32 +3,29 @@ import time
 import tkinter as tk
 
 
-def solve(board, window, grid_boxes=None):
+def solve(board, gui=None):
+    """Solves the sudoku board represented as a nested list using DFS backtracking
+    If a GUI reference is passed in the solve is displayed to the user"""
     if is_solution(board):
-        return board, window, grid_boxes
+        return board
     row, col = get_first_unfilled_square(board)
     possible_solutions = get_valid_numbers(board, row, col)
     if possible_solutions:
         for number in possible_solutions:
-            if grid_boxes:
-                grid_boxes[row][col].after(20000000, update_gui, "Green", number)
-                grid_boxes[row][col].config(fg="Green")
-                grid_boxes[row][col].set(number)
-                window.update_idletasks()
-                # time.sleep(0.01)
+            if gui:
+                gui.update_single_grid_gui_square(row, col, "Green", number)
+                time.sleep(0.2)
             board[row][col] = number
-            solved = solve(board, window, grid_boxes)
+            solved = solve(board, gui)
             if is_solution(solved):
                 return solved
 
     board[row][col] = 0
-    if grid_boxes:
-        update_gui(window, grid_boxes[row][col], "Red", "")
-        # time.sleep(0.01)
-        window.update_idletasks()
-        grid_boxes[row][col].set("")
-        # time.sleep(0.01)
-        window.update_idletasks()
+    if gui:
+        gui.update_single_grid_gui_square(row, col, "Red")
+        time.sleep(0.1)
+        gui.update_single_grid_gui_square(row, col, "Red", 0)
+        time.sleep(0.1)
     return board
 
 
@@ -54,7 +51,7 @@ def get_valid_numbers_in_row(board, row, col):
 def get_valid_in_column(board, row, col):
     """Returns a set of numbers valid in the column given sudoku constraints"""
     valid_numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9}
-    for row_index, _ in enumerate(board):
+    for row_index in range(9):
         if row_index == row:
             continue
         square = board[row_index][col]
@@ -79,9 +76,9 @@ def get_valid_in_square(board, row, col):
 
 
 def is_solution(board):
-    """Checks if the board is competely filled with non zero numbers"""
-    for row in range(len(board)):
-        for col in range(len(board)):
+    """Checks if the board is completely filled with non zero numbers"""
+    for row in range(9):
+        for col in range(9):
             if board[row][col] not in get_valid_numbers(board, row, col):
                 return False
     return True
@@ -89,35 +86,32 @@ def is_solution(board):
 
 def get_first_unfilled_square(board):
     """Gets the first square in the board that has a value of zero"""
-    for row_index, row in enumerate(board):
-        for col_index, _ in enumerate(row):
-            if board[row_index][col_index] == 0:
-                return row_index, col_index
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                return row, col
 
 
-def generate_new_board(grid_boxes=None):
-    """Randomly generates a seed for a board, then solves the board and removes
-    numbers until more than one solution can be reached"""
+def generate_new_board():
+    """Randomly generates a seed for a board, then solves the board and randomly removes numbers"""
     new_board = [[0] * 9 for i in range(9)]
     possible_numbers = [1,2,3,4,5,6,7,8,9]
     row = randint(0,8)
-    for col in range(len(new_board[row])):
+    for col in range(9):
         value = choice(possible_numbers)
         possible_numbers.remove(value)
         new_board[row][col] = value
 
-    new_board = solve(new_board, grid_boxes)
+    new_board = solve(new_board, None)
 
     for row in range(9):
         num_squares_to_delete = randint(7,9)
-        for i in range(num_squares_to_delete):
+        for _ in range(num_squares_to_delete):
             col = randint(0,8)
             new_board[row][col] = 0
 
     return new_board
 
-def update_gui(window, grid_box, colour, value):
-    grid_box.config(fg=colour)
-    grid_box.set(value)
+
 
 
