@@ -1,9 +1,13 @@
 from random import choice, randint
 import time
-import tkinter as tk
 
+def solve(board, gui):
+    solved_board = dfs_solve(board, gui)
+    if gui:
+        gui.toggle_buttons(True)
+    return solved_board
 
-def solve(board, gui=None):
+def dfs_solve(board, gui=None):
     """Solves the sudoku board represented as a nested list using DFS backtracking
     If a GUI reference is passed in the solve is displayed to the user"""
     if is_solution(board):
@@ -16,7 +20,7 @@ def solve(board, gui=None):
                 gui.update_single_grid_gui_square(row, col, "Green", number)
                 time.sleep(0.2)
             board[row][col] = number
-            solved = solve(board, gui)
+            solved = dfs_solve(board, gui)
             if is_solution(solved):
                 return solved
 
