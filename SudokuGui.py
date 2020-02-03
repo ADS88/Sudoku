@@ -12,24 +12,27 @@ class MainApplication():
         self.feedback_label = None
         self.setup_gui()
         self.grid_boxes_values = [[1, 0, 0, 0, 7, 0, 3, 0, 0],
-                                  [0,8,0,0,2,0,7,0,0],
-                                  [3,0,0,0,8,9,0,0,4],
-                                  [8,4,0,0,0,1,9,0,3],
-                                  [0,0,3,7,0,8,5,0,0],
-                                  [9,0,1,2,0,0,0,7,8],
-                                  [7,0,0,3,5,0,0,0,9],
-                                  [0,0,9,0,4,0,0,5,0],
-                                  [0,0,4,0,1,0,0,0,2]]
+                                  [0, 8, 0, 0, 2, 0, 7, 0, 0],
+                                  [3, 0, 0, 0, 8, 9, 0, 0, 4],
+                                  [8, 4, 0, 0, 0, 1, 9, 0, 3],
+                                  [0, 0, 3, 7, 0, 8, 5, 0, 0],
+                                  [9, 0, 1, 2, 0, 0, 0, 7, 8],
+                                  [7, 0, 0, 3, 5, 0, 0, 0, 9],
+                                  [0, 0, 9, 0,4 ,0 ,0 ,5 ,0],
+                                  [0, 0, 4, 0, 1, 0, 0, 0, 2]]
         self.set_grid_gui_from_values(self.grid_boxes_values)
 
     def setup_gui(self):
         """Creates buttons and labels used in the GUI"""
         self.window.title("Sudoku")
-        self.window.geometry('680x550')
+        self.set_dimensions()
         self.create_grid_gui()
         self.create_buttons()
         self.feedback_label = tk.Label(self.window, text="")
         self.feedback_label.grid(column=3, row=12, columnspan=2)
+
+    def set_dimensions(self):
+        self.window.geometry('690x550')
         self.window.columnconfigure(0, minsize=20)
         self.window.rowconfigure(0, minsize=20)
         self.window.rowconfigure(10, minsize=20)
@@ -51,32 +54,24 @@ class MainApplication():
         for row in range(9):
             self.grid_boxes_gui.append([])
             for col in range(9):
-                padx = 0
-                pady = 0
                 input_box = SudokuGridBox(self.window, width=3, font=('Ubuntu', 28), justify='center')
                 input_box.configure(highlightbackground="red", highlightcolor="red")
-                if row % 3 == 0:
-                    pady = (10,0)
-                if col % 3 == 0:
-                    padx = (10,0)
+                pady = (10, 0) if row % 3 == 0 else 0
+                padx = (10, 0) if col % 3 == 0 else 0
                 input_box.grid(column=col + 1, row=row + 1, padx=padx, pady=pady)
                 self.grid_boxes_gui[row].append(input_box)
 
     def set_grid_gui_from_values(self, grid=None):
         """Sets the board to display the numbers in a sudoku grid given in nested list format,
         resets the board to what it was previously set as if grid is None"""
-        if not grid:
+        if grid is None:
             grid = self.grid_boxes_values
         for row_index, row in enumerate(self.grid_boxes_gui):
             for column_index, box in enumerate(row):
-                if grid:
-                    value = grid[row_index][column_index]
-                    if value != 0:
-                        box.set(value)
-                        box.config(state='readonly')
-                    else:
-                        box.set("")
-                        box.config(state="normal")
+                value = grid[row_index][column_index]
+                if value != 0:
+                    box.set(value)
+                    box.config(state='readonly')
                 else:
                     box.set("")
                     box.config(state="normal")
@@ -104,6 +99,7 @@ class MainApplication():
     def solve_board(self):
         """Solves the current board and updates the gui to display the solution"""
         self.toggle_buttons(False)
+        self.set_grid_gui_from_values()
         board = copy.deepcopy(self.grid_boxes_values)
         solve_thread = threading.Thread(target=solve, args=(board, self), daemon=True)
         solve_thread.start()
@@ -148,7 +144,6 @@ class SudokuGridBox(tk.Entry):
         value = self.get()
         if not value:
             self.set("")
-
         elif value.isdigit() and len(value) < 2 and value != "0":
             # the current value is only digits; allow this
             self.old_value = self.get()

@@ -1,15 +1,18 @@
 from random import choice, randint
 import time
 
-def solve(board, gui):
+
+def solve(board, gui=None):
+    """Solves the board and displays board to GUI/renables buttons if gui is not none.
+    Returns solved board as nested list """
     solved_board = dfs_solve(board, gui)
     if gui:
         gui.toggle_buttons(True)
     return solved_board
 
-def dfs_solve(board, gui=None):
-    """Solves the sudoku board represented as a nested list using DFS backtracking
-    If a GUI reference is passed in the solve is displayed to the user"""
+def dfs_solve(board, gui):
+    """Solves the sudoku board represented as a nested list using DFS backtracking.
+    If a GUI reference is passed in, the solving process is displayed to the user"""
     if is_solution(board):
         return board
     row, col = get_first_unfilled_square(board)
@@ -35,10 +38,7 @@ def dfs_solve(board, gui=None):
 
 def get_valid_numbers(board, row, col):
     """Returns a set of possible numbers that could be inserted in a grid cell"""
-    valid_in_row_set = get_valid_numbers_in_row(board, row, col)
-    valid_in_col_set = get_valid_in_column(board, row, col)
-    valid_in_square_set = get_valid_in_square(board, row, col)
-    return valid_in_col_set & valid_in_row_set & valid_in_square_set
+    return get_valid_numbers_in_row(board, row, col) & get_valid_in_column(board, row, col) & get_valid_in_square(board, row, col)
 
 
 def get_valid_numbers_in_row(board, row, col):
